@@ -328,7 +328,7 @@ input[type="text"] {
 
 .spotifyPlaylists .card:hover .play {
     opacity: 1;
-    top: 123px;
+    top: 120px;
 
 }
 
@@ -343,8 +343,8 @@ input[type="text"] {
 }
 
 .play {
-    width: 35px;
-    height: 35px;
+    width: 40px;
+    height: 40px;
     background-color: #00FF00;
     border-radius: 50%;
     display: flex;
@@ -352,14 +352,19 @@ input[type="text"] {
     justify-content: center;
     position: absolute;
     right: 13px;
-    top: 130px;
+    top: 127px;
     transition: all 0.3s ease-out;
     opacity: 0;
 }
 
+/* Show play button when it has pause icon (active playlist) */
+.card .play.playing {
+    opacity: 1;
+}
+
 .card .play img {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     fill: #000;
     /* You can change this to white if you want */
 }

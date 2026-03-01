@@ -2,6 +2,8 @@ console.log("this is my javascript")
 let currentSong = new Audio();
 let songs;
 let songsul;
+let currentPlaylistFolder = null; // Track which playlist is currently playing
+
 function formatTime(totalSeconds) {
     if (isNaN(totalSeconds) || totalSeconds === undefined) {
         return "00:00";
@@ -28,6 +30,23 @@ async function getsongs(folder) {
     if (songData[folder]) {
         songs = songData[folder].map(song => `/songs/${encodeURIComponent(folder)}/${song}`);
     }
+
+    // Update current playlist tracking
+    currentPlaylistFolder = folder;
+    
+    // Reset all card play buttons
+    document.querySelectorAll(".card").forEach(card => {
+        card.querySelector(".play img").src = "./svgs/play.svg";
+        card.querySelector(".play").classList.remove("playing");
+    });
+    
+    // Set current playlist card to pause
+    document.querySelectorAll(".card").forEach(card => {
+        if (card.dataset.folder === folder) {
+            card.querySelector(".play img").src = "./svgs/pause.svg";
+            card.querySelector(".play").classList.add("playing");
+        }
+    });
 
 
 
@@ -127,6 +146,13 @@ function playmusic(trackname, pause = false) {
                     li.querySelector(".play1 img").src = "./svgs/play.svg";
                 }
             });
+            // Reset current playlist card button
+            document.querySelectorAll(".card").forEach(card => {
+                if (card.dataset.folder === currentPlaylistFolder) {
+                    card.querySelector(".play img").src = "./svgs/play.svg";
+                    card.querySelector(".play").classList.remove("playing");
+                }
+            });
         });
     }
     console.log(currentSong.src)
@@ -155,6 +181,14 @@ async function main() {
 
                 }
             });
+            
+            // Update current playlist card
+            document.querySelectorAll(".card").forEach(card => {
+                if (card.dataset.folder === currentPlaylistFolder) {
+                    card.querySelector(".play img").src = "./svgs/pause.svg";
+                    card.querySelector(".play").classList.add("playing");
+                }
+            });
 
             currentSong.play();
 
@@ -165,6 +199,14 @@ async function main() {
             Array.from(songsul.getElementsByTagName("li")).forEach(li => {
                 if (li.querySelector(".info").firstElementChild.innerText === document.querySelector(".songinfo").innerHTML) {
                     li.querySelector(".play1 img").src = "./svgs/play.svg";
+                }
+            });
+            
+            // Update current playlist card
+            document.querySelectorAll(".card").forEach(card => {
+                if (card.dataset.folder === currentPlaylistFolder) {
+                    card.querySelector(".play img").src = "./svgs/play.svg";
+                    card.querySelector(".play").classList.remove("playing");
                 }
             });
 
@@ -303,7 +345,40 @@ async function main() {
     //add dynamic folder songs
     document.querySelectorAll(".card").forEach(e => {
         e.addEventListener("click", async () => {
-            songs = await getsongs(`${e.dataset.folder}`)
+            const clickedFolder = e.dataset.folder;
+            
+            // If clicking the same playlist that's already loaded
+            if (clickedFolder === currentPlaylistFolder) {
+                // Toggle play/pause
+                if (currentSong.paused) {
+                    currentSong.play();
+                    play.src = "./svgs/pause1.svg";
+                    e.querySelector(".play img").src = "./svgs/pause.svg";
+                    e.querySelector(".play").classList.add("playing");
+                    
+                    // Update sidebar song button
+                    Array.from(songsul.getElementsByTagName("li")).forEach(li => {
+                        if (li.querySelector(".info").firstElementChild.innerText === document.querySelector(".songinfo").innerHTML) {
+                            li.querySelector(".play1 img").src = "./svgs/pause.svg";
+                        }
+                    });
+                } else {
+                    currentSong.pause();
+                    play.src = "./svgs/play1.svg";
+                    e.querySelector(".play img").src = "./svgs/play.svg";
+                    e.querySelector(".play").classList.remove("playing");
+                    
+                    // Update sidebar song button
+                    Array.from(songsul.getElementsByTagName("li")).forEach(li => {
+                        if (li.querySelector(".info").firstElementChild.innerText === document.querySelector(".songinfo").innerHTML) {
+                            li.querySelector(".play1 img").src = "./svgs/play.svg";
+                        }
+                    });
+                }
+            } else {
+                // Load new playlist
+                songs = await getsongs(clickedFolder);
+            }
             console.log(e)
 
         })
