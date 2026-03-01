@@ -20,17 +20,13 @@ function formatTime(totalSeconds) {
 async function getsongs(folder) {
 
     let songs = [];
-    let a = await fetch(`/songs/${folder}`);
-    let response = await a.text();
-    let div = document.createElement('div');
-    div.innerHTML = response;
-    let as = div.getElementsByTagName('a');
-    for (let i = 0; i < as.length; i++) {
-        let href = as[i].href;
-        if (as[i].href.endsWith("mp3")) {
-            songs.push(as[i].href)
-        }
-
+    // Fetch song list from JSON manifest
+    let response = await fetch('/songs/songs.json');
+    let songData = await response.json();
+    
+    // Get songs for the specified folder
+    if (songData[folder]) {
+        songs = songData[folder].map(song => `/songs/${folder}/${song}`);
     }
 
 
@@ -154,9 +150,10 @@ async function main() {
                     li.querySelector(".play1 img").src = "./svgs/play.svg";
                 }
             });
-            let index = songs.indexOf(currentSong.src);
-        let songname = songs[(index + 1) % songs.length].split("songs/")[1].replaceAll("_", " ").split(".")[0];
-        playmusic(songname);
+            let currentPath = new URL(currentSong.src).pathname;
+            let index = songs.indexOf(currentPath);
+            let songname = songs[(index + 1) % songs.length].split("songs/")[1].replaceAll("_", " ").split(".")[0];
+            playmusic(songname);
 
         }
         if (currentSong.currentTime == 0) {
@@ -193,7 +190,8 @@ async function main() {
     })
     previous.addEventListener("click", () => {
 
-        let index = songs.indexOf(currentSong.src);
+        let currentPath = new URL(currentSong.src).pathname;
+        let index = songs.indexOf(currentPath);
         if (index != 0) {
 
             let songname = songs[(index - 1) % songs.length].split("songs/")[1].replaceAll("_", " ").split(".")[0];
@@ -203,7 +201,8 @@ async function main() {
 
     })
     next.addEventListener("click", () => {
-        let index = songs.indexOf(currentSong.src);
+        let currentPath = new URL(currentSong.src).pathname;
+        let index = songs.indexOf(currentPath);
         let songname = songs[(index + 1) % songs.length].split("songs/")[1].replaceAll("_", " ").split(".")[0];
         playmusic(songname);
     })
